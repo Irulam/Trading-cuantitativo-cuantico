@@ -1,0 +1,133 @@
+%% This is file `example_DarkConsole.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% examples_kmbeamer.dtx  (with options: `DarkConsole')
+%% Copyright (c) 2011-2013 Kazuki Maeda <kmaeda@users.sourceforge.jp>
+%% 
+%% Distributable under the MIT License:
+%% http://www.opensource.org/licenses/mit-license.php
+%% 
+%%% もし pdfTeX や LuaTeX を使うなら dvipdfmx オプションを外す．
+% \documentclass[dvipdfmx]{beamer}
+% Modified by LianTze Lim to work with fontspec/xelatex
+% \documentclass[handout]{beamer}
+\documentclass[aspectratio=169,svgnames]{beamer}
+\usepackage[spanish]{babel}
+\usepackage{mathspec}
+\usepackage{minted}
+\usepackage{pgfpages}
+\usepackage{tikz}
+\usepackage{datetime}
+\usepackage{xparse}
+\usepackage{epigraph}
+\usepackage{enumitem}
+\usepackage{fontawesome}
+\usepackage{hyperref}
+\usepackage[sorting=none]{biblatex}
+\usepackage{csquotes}
+\usepackage[type={CC}, modifier={by}, version={4.0}]{doclicense}
+% \usepackage{xeCJK}
+% \setCJKmainfont{IPAPMincho}
+% \setCJKsansfont{IPAGothic}
+% \setCJKmonofont{IPAGothic}
+
+% You can set fonts for Latin script here
+% \setmainfont{FreeSerif}
+% \setsansfont{FreeSans}
+% \setmonofont{Latin Modern Mono}
+
+% \usepackage{siunitx}
+% \usetheme{DarkConsole}
+\usetheme{Rochester}
+\usecolortheme{default}
+
+%%%% BIBLIOGRAPHY THINGS
+\addbibresource{bibliografia.bib}
+\setbeamertemplate{bibliography item}{\faFileTextO}
+\renewcommand*{\bibfont}{\small}
+
+%%%% TIKZ THINGS
+\usetikzlibrary{positioning, arrows.meta, calc, decorations.pathreplacing, matrix, overlay-beamer-styles}
+\usetikzlibrary{flowcharts}
+\tikzset{>=stealth}
+\tikzset{marked on/.style={alt=#1{marked}{}}}
+
+\let\oldquote\quote
+\let\endoldquote\endquote
+
+\RenewDocumentEnvironment{quote}{om}
+    {\oldquote}
+    {\par\nobreak\smallskip
+     \hfill \textemdash~#2\endoldquote
+     \addvspace{\bigskipamount}
+    }
+    
+
+%\setbeameroption{show notes on second screen}
+\title[Quantum Computation Quant]{Valoración de Opciones de Compra y Venta\\ usando Computación Cuántica con Qiskit}
+\subtitle{Aplicaciones Financieras de la Computación Cuántica}
+% \email{david@ddavo.me}
+% \email{leidyvid@ucm.es}
+\author{David Davó \& Leidy Vanesa Vidales}
+\date{2021-05-26}
+% \location{Madrid/Círculo\_de\_Bellas\_Artes}
+% \logo{\includegraphics[scale=.2]{Images/logos/escudofdigrande.png}}
+% \institute[FdI UCM]{Facultad de Informática}
+\logo{\includegraphics[height=1cm]{Images/logos/3-2016-07-21-EscudoUCMTransparenteBig.png}}
+\titlegraphic{
+    \includegraphics[height=2cm]{Images/logos/3-2016-07-21-EscudoUCMTransparenteBig.png}
+    \hspace{.3cm}
+    \includegraphics[height=2cm]{Images/logos/escudofdigrande.png}
+    % \hspace{.3cm}
+    % \tikz\node[circle, minimum width=1.9cm,
+    %     path picture = {
+    %         \node at (path picture bounding box.center) {
+    %             \includegraphics[width=2cm]{Images/logos/ascii.jpg}
+    %         };
+    %     }
+    % ] {};
+}
+
+%% Based on https://tex.stackexchange.com/questions/55806/mindmap-tikzpicture-in-beamer-reveal-step-by-step/55849#55849
+% Now using https://ctan.org/pkg/aobs-tikz
+
+% \makeatletter\beamer@tocsectionnumber=-1\setcounter{section}{-1}\relax\makeatother
+\begin{document}
+
+\frame[plain]{\titlepage}
+
+% \input{Sections/presentacion.tex}
+
+\setcounter{tocdepth}{2}
+\begin{frame}[allowframebreaks]{Índice}
+  \tableofcontents
+\end{frame}
+
+\input{Sections/tiposmercados}
+\input{Sections/futuresandforwards}
+\input{Sections/options}
+\input{Sections/optionvaloration}
+
+\section*{Referencias}
+\begin{frame}[allowframebreaks]{Referencias}
+    \nocite{*}
+    % \bibliographystyle{plain}
+    % \bibliographystyle{acm}
+    \printbibliography
+\end{frame}
+
+\setcounter{tocdepth}{2}
+\begin{frame}[plain]{Q\&A}
+    \begin{minipage}[t][.8\textheight]{\textwidth}
+        \small
+        \tableofcontents
+    \end{minipage}
+    {\tiny\doclicenseThis}
+\end{frame}
+
+\end{document}
+\endinput
+%%
+%% End of file `example_DarkConsole.tex'.

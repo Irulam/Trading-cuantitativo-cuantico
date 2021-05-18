@@ -1,0 +1,46 @@
+\section{Opciones}
+
+\begin{frame}{Opciones}
+    \only<+->{\begin{itemize}
+        \item Precio de entrega $\longrightarrow$ Precio de \alert{ejercicio/strike}
+        \item Fecha de entrega $\longrightarrow$ Fecha de \alert{vencimiento}
+    \end{itemize}}
+    
+    \begin{exampleblock}{Opción de compra (put)}<+->
+        Dentro de \alert{30 días} \textit{puedo} comprar la acción por \alert{50€}
+    \end{exampleblock}
+    
+    \begin{alertblock}{}<+->
+        En 30 días el valor de la acción es \alert{60€}. Ejecuto la opción, y pago \alert{50€} por algo que vale \alert{60€}, ¡\textit{gano 10€}!
+        \bigbreak\only<+->{Si en 30 días el valor de la acción es menor de \alert{50€}. \textbf{No} ejecuto la opción y no gano nada.}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Función de pago}
+
+    \begin{exampleblock}{}
+        \begin{itemize}
+            \item $V$: Valor de la acción en la \textit{fecha de vencimiento}
+            \item $E$: Precio de ejercicio
+        \end{itemize}
+    \end{exampleblock}
+    \begin{block}{Opción de compra (call)}<+->
+        \vspace{-10pt}
+        \begin{equation}
+            \max\left(V-E,0\right)
+        \end{equation}
+    \end{block}
+    \begin{block}{Opción de venta (put)}<+->
+        \vspace{-10pt}
+        \begin{equation}
+            \max\left(E-V,0\right)
+        \end{equation}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Tipos de Opciones}
+    \begin{itemize}
+        \item<+-> \textbf{Europeas}: Ejercicio sólo posible \alert{en} fecha de vencimiento
+        \item<+-> \textbf{Americanas}: Ejercicio posible \alert{hasta} fecha de vencimiento
+    \end{itemize}
+\end{frame}

@@ -1,0 +1,24 @@
+\section{Futuros y Forwards}
+
+\begin{frame}{Futuros y Forwards}
+    \begin{exampleblock}{Contrato forward}<+->
+        ``El%
+        \tikz[baseline, remember picture]{\node[anchor=base] (a1) {\alert{Lunes que viene}};}%
+        te prometo que te compro esta acción por%
+        \tikz[baseline, remember picture]{\node[anchor=base] (a2) {\alert{30€}''};}
+    \end{exampleblock}
+    
+    \begin{tikzpicture}[overlay, remember picture]
+        \node [below=of a1.east] (d1) {Fecha de entrega};
+        \node [below=of a2.west] (d2) {Precio de entrega};
+    
+        \path[->] (d1) edge[bend right] (a1);
+        \path[->] (d2) edge[bend left] (a2);
+    \end{tikzpicture}
+    \vspace{1em}
+    \begin{alertblock}{}<+->
+        Si el \alert{Lunes que viene} la acción vale \alert{34€}, cuando la compre por \alert{30€}, ¡habré ganado \alert{4€}!
+        \bigbreak
+        \visible<+->{Si el \alert{Lunes que viene} la acción vale \alert{18€}, cuando la compre por \alert{30€}, habré perdido \alert{12€} :(}
+    \end{alertblock}
+\end{frame}

@@ -1,0 +1,158 @@
+\section{Valoración de Opciones}
+\subsection{Modelo Binomial}
+\begin{frame}{BOPM: Precio de la acción}
+    \centering
+    \begin{tikzpicture}[
+        label distance=-2mm,
+        every node/.style={circle,fill=black,inner sep=0pt,minimum size=5pt},
+        every path/.style={->,very thick}
+    ]
+        \node[label=above:{30.00€}] (r) {};
+        
+        \node[rectangle,draw,inner sep=2mm,fill=yellow!20,left=of r,anchor=east,text width=2cm, align=center] (leyenda) {$u=5\%$ \\ $d\simeq 4.8\%$ \\ $p=0.6$ \\ E=31.00€}; 
+        
+        \onslide<2->\begin{scope}[node distance=6mm and 20mm]
+            \node[above right=of r,label=above:{\footnotesize 31.50€}] (u) {};
+            \node[below right=of r,label=above:{\footnotesize 28.57€}] (d) {};
+        
+            \draw[green] (r) -- (u) node [rectangle,fill=none,text=black,minimum size=0pt, midway, above=3mm] {$p$};
+            \draw[red]   (r) -- (d) node [rectangle,fill=none,text=black,minimum size=0pt, midway, below=3mm] {$(1-p)$};
+        \end{scope}
+        
+        \onslide<3->\begin{scope}[node distance=6mm and 20mm]
+            \node[above right=of u,label=above:{\footnotesize 33.08€}] (uu) {};
+            \node[above right=of d,label=above:{\footnotesize 30.00€}] (du) {};
+            \pgfnodealias{ud}{du}
+            \node[below right=of d,label=above:{\footnotesize 27.21€}] (dd) {};
+        
+            \path[green] (u) edge (uu);
+            \path[green] (d) edge (du);
+            \path[red]   (u) edge (ud);
+            \path[red]   (d) edge (dd);
+        \end{scope}
+        
+        \onslide<4->\begin{scope}[node distance=6mm and 20mm]
+            \node[above right=of uu,label=above:{\footnotesize 34.73€}] (uuu) {};
+            \node[above right=of du,label=above:{\footnotesize 31.50€}] (duu) {};
+            \node[above right=of dd,label=above:{\footnotesize 28.57€}] (ddu) {};
+            \node[below right=of dd,label=above:{\footnotesize 25.91€}] (ddd) {};
+            \pgfnodealias{udu}{duu}
+            \pgfnodealias{uud}{duu}
+            \pgfnodealias{dud}{ddu}
+            \pgfnodealias{udd}{ddu}
+            
+            \path[green] (uu) edge (uuu);
+            \path[green] (du) edge (duu);
+            % \path[green] (ud) edge (udu);
+            \path[green] (dd) edge (ddu);
+            \path[red]   (uu) edge (uud);
+            \path[red]   (du) edge (dud);
+            % \path[red]   (ud) edge (udd);
+            \path[red]   (dd) edge (ddd);
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{BOPM: Precio de la opción de compra}
+    \centering
+    \begin{tikzpicture}[
+        label distance=-1mm,
+        every node/.style={circle,fill=black,inner sep=0pt,minimum size=5pt},
+        every path/.style={->,very thick}
+    ]
+        \node (r) {};
+        \onslide<1-3|handout:0>{\node[label={[label distance=2mm]above:?}] at (r) {};}
+        
+        \node[rectangle,draw,inner sep=2mm,fill=yellow!20,left=of r,anchor=east,text width=2cm, align=center] (leyenda) {$u=5\%$ \\ $d\simeq 4.8\%$ \\ $p=0.6$ \\ E=31.00€}; 
+        
+        \onslide<1->\begin{scope}[node distance=6mm and 20mm]
+            \node[above right=of r] (u) {};
+            \node[below right=of r] (d) {};
+        
+            \draw[green] (r) -- (u) node [rectangle,fill=none,text=black,minimum size=0pt, midway, above=3mm] {$p$};
+            \draw[red]   (r) -- (d) node [rectangle,fill=none,text=black,minimum size=0pt, midway, below=3mm] {$(1-p)$};
+        \end{scope}
+        
+        \onslide<1->\begin{scope}[node distance=6mm and 20mm]
+            \node[above right=of u] (uu) {};
+            \node[above right=of d] (du) {};
+            \node[below right=of d] (dd) {};
+            \pgfnodealias{ud}{du}
+        
+            \path[green] (u) edge (uu);
+            \path[green] (d) edge (du);
+            \path[red]   (u) edge (ud);
+            \path[red]   (d) edge (dd);
+        \end{scope}
+        
+        \onslide<1->\begin{scope}[node distance=6mm and 20mm]
+            \node[above right=of uu] (uuu) {};
+            \node[above right=of du,label={[text=blue]above:\footnotesize 0.50€}] (duu) {};
+            \node[above right=of dd,label={[text=blue]above:\footnotesize 0.00€}] (ddu) {};
+            \node[below right=of dd,label={[text=blue]above:\footnotesize 0.00€}] (ddd) {};
+            \pgfnodealias{udu}{duu}
+            \pgfnodealias{uud}{duu}
+            \pgfnodealias{dud}{ddu}
+            \pgfnodealias{udd}{ddu}
+            
+            \node[fill=none,text=blue,above=-1mm of uuu] (uuul) {\footnotesize 3.73€};
+            \node[fill=none,rectangle,inner sep=1mm,below right=8mm of uuu] (exp1) {$\max(V-E,0)$};
+            \path[->] (exp1.north) edge[bend right] (uuul);
+            
+            \path[green] (uu) edge (uuu);
+            \path[green] (du) edge (duu);
+            % \path[green] (ud) edge (udu);
+            \path[green] (dd) edge (ddu);
+            \path[red]   (uu) edge (uud);
+            \path[red]   (du) edge (dud);
+            % \path[red]   (ud) edge (udd);
+            \path[red]   (dd) edge (ddd);
+        \end{scope}
+        
+        \onslide<2->\begin{scope}[minimum size=0pt]
+            \node[label={[text=blue]above:\footnotesize 0.30€}] at (ud) {};
+            \node[label={[text=blue]above:\footnotesize 0.00€}] at (dd) {};
+            
+            \node[fill=none,rectangle,text=blue,above=1mm of uu] (uul) {\footnotesize 2.44€};
+            \node[fill=none,rectangle,inner sep=1mm,above left=8mm of uu] (exp2) {media};
+            \path[->] (exp2.south) edge[bend right] (uul);
+        \end{scope}
+        
+        \onslide<3->\begin{scope}[minimum size=0pt]
+            \node[fill=none,rectangle,text=blue,above=1mm of u] (ul) {\footnotesize 1.39€};
+            \node[label={[text=blue]above:\footnotesize 0.18€}] at (d) {};
+            \path[->] (exp2.south) edge[bend right] (ul);
+        \end{scope}
+        
+        \onslide<4->\begin{scope}[minimum size=0pt, node distance=1mm]
+            \node[draw,rectangle,blue,fill=none,inner sep=1mm,above=of r,text=DarkGreen] (rl) {0.91€};
+        \end{scope}
+    \end{tikzpicture}
+\end{frame}
+
+\subsection{Método de Montecarlo}
+\begin{frame}{Método de Montecarlo}
+    \begin{enumerate}
+        \item<1-> Variable aleatoria $X$ $\Longrightarrow$ Distribución de probabilidad $\mathbb{P}$
+        \item<2-> Generamos $M$ trayectorias de precio distintas
+        \item<3-> Calculamos el \textit{payoff} esperado para cada una de las trayectorias $f(X_i)$
+        \item<4-> Estimamos la esperanza del \textit{payoff}
+    \end{enumerate}
+    
+    \begin{columns}
+        \begin{column}{.5\textwidth}
+            \begin{block}{Cálculo estimado de la esperanza}<4->
+                \begin{equation}
+                    \widehat{\mathbb{E}}_\mathbb{P}\left[f\left(X\right)\right] = \frac{1}{M}\sum^M_{i=1}f\left(X_i\right)
+                \end{equation}
+            \end{block}
+        \end{column}%
+        \begin{column}{.5\textwidth}
+            \begin{alertblock}{Complejidad}<5->
+                \begin{equation*}
+                    \mathcal{O}\left(\frac{1}{\sqrt{M}}\right)
+                \end{equation*}
+            \end{alertblock}
+        \end{column}
+    \end{columns}
+\end{frame}
