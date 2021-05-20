@@ -1,0 +1,234 @@
+\section{Valoración de Opciones Europeas de Compra con Qiskit}
+\label{sec:qiskit}
+\begin{minted}{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from qiskit import Aer, QuantumCircuit
+from qiskit.aqua.algorithms import IterativeAmplitudeEstimation
+from qiskit.circuit.library import LogNormalDistribution, LinearAmplitudeFunction
+\end{minted}
+
+Además de importar las librerías de siempre de Qiskit, vamos a usar la librería Qiskit \href{https://qiskit.org/documentation/apidoc/qiskit_aqua.html}{Aqua} que contiene implementaciones de distintos algoritmos, como el de estimación de amplitud que usaremos. También cuenta con un módulo \texttt{qiskit.aqua.finance} con algorítmos específicos para finanzas.
+
+También usaremos la librería de circuitos pre-implementados de Qiskit, para simular una distribución log-normal en los qubits de nuestro circuito.
+
+Como hemos podido ver en la memoria, dado $V$ el valor del subyacente en la fecha de vencimiento y $E$ el precio de ejercicio, la función de pago de una función de compra será:
+$$ \max\left(V-E,0\right) $$
+
+Al igual que con el método de Montecarlo, generaremos una distribución de probabilidad $\mathbb{P}$, que concretamente seguirá una distribución log-normal. Nuestro \textbf{objetivo} será obtener aproximadamente el valor esperado de la función de pago para la distribución, pero en un tiempo mucho más eficiente que con Montecarlo. Para ello, nos apoyaremos en la estimación de la amplitud:
+
+$$ \hat{\mathbb{E}}_{\mathbb{P}}\left[\max\left(V-E,0\right)\right] $$
+
+También nos interesará obtener $\Delta$, la función que nos define la distribución de probabilidad del precio de la opción:
+
+$$ \Delta = \mathbb{P}\left[V\geq E\right] $$
+
+\subsection{Modelo de incertidumbre}
+Vamos a ver lo que hace el circuito \texttt{LogNormalDistribution}. Dados $n$ qubits inicializados a $|0\rangle$, retorna en superposición la codificación en el dominio de la fase de la distribución log-normal discretizada en $2^n$ puntos (todos los posibles con $n$ qubits). Es decir, siendo $p_i$ el punto $i$ de la distribución de probabilidad discretizada, el circuito realiza la siguiente función matemática:
+
+$$ |0\rangle_n \mapsto |\psi\rangle_n = \sum_{i=0}^{2^n-1} \sqrt{p_i}|i\rangle_n $$
+
+Por lo tanto, con tan solo $n$ qubits, ¡tenemos codificados $2^n$ puntos de la distribución lognormal!
+
+Siguiendo el modelo Black-Scholes-Merton, podemos crear nuestra distribución log-normal con los parámetros:
+
+$$ \mu = (r-0.5\sigma^2)T+\ln\left(S_0\right) $$
+
+Donde $\sigma$ es la volatilidad (que en el modelo Black-Scholes-Merton considera constante), $r$ es el interés de mercado, $T$ es el tiempo que pasa hasta la fecha de vencimiento y $S_0$ es el precio del activo con $t=0$.
+
+El problema de este modelo es que requiere de una cantidad de puertas cuánticas insasumible.
+
+Para solucionar este problema se usa un circuito cuántico implementación de un red neuronal denominada generative adversarial network (GAN) que interpreta la distribución como un estado cuántico.
+
+Para ser más precisos en la discretización, el algoritmo nos permite establecer el rango de valores entre los que discretizaremos, elegiremos el rango en el que los datos no se desvían más de 3 veces la desviación típica de la media.
+
+Vamos a realizar un ejemplo, donde el precio inicial de la acción es $2€$, la volatilidad es de 0.4, y su interés anual es del 5\%, queremos calcular la distribución de valores de dicha acción tras 40 días.
+
+\begin{minted}{python}
+qubits = 3
+
+#Precio actual
+spot_price = 2.0
+
+#Disminución del valor de un dato financiero respecto a su media
+volatilidad = 0.4
+
+interes_anual = 0.05
+
+#Periodo de tiempo antes de la "fecha de vencimiento"
+maduración = 40 / 365
+
+mu = ((interes_anual - 0.5 * volatilidad**2) * maduración + np.log(spot_price))
+sigma = volatilidad * np.sqrt(maduración)
+media = np.exp(mu + sigma**2/2)
+varianza = (np.exp(sigma**2) - 1) * np.exp(2*mu + sigma**2)
+stddev = np.sqrt(varianza)
+
+# La discretización nos permite establecer unos límites
+bajo  = np.maximum(0, media - 3*stddev)
+alto = media + 3*stddev
+
+modelo_incertidumbre = LogNormalDistribution(qubits, mu=mu, sigma=sigma**2, bounds=(bajo, alto))
+\end{minted}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/notebooks/figure01.png}
+    \caption{Representación gráfica de la variable \texttt{modelo\_incertidumbre}}
+\end{figure}
+
+\subsection{Algoritmo de estimación de la amplitud}
+En la computación cuántica se consigue una mejora de la eficiencia respecto a los modelos clásicos con el algoritmo de Estimación de la amplitud.
+
+Para un operador $\mathcal{A}$ que actúe en un registro de n+1 qubits tal que $\mathcal{A}|0\rangle_{n+1}=\sqrt{1-a}|\psi_0\rangle_n|0\rangle + \sqrt{a} |\psi_1\rangle|1\rangle$ donde $|\psi_0\rangle_n$ y $|\psi_0\rangle_n$ son estados normalizados y a pertenece a $[0,1]$. La estimación de amplitud estima el valor de a, que es la probabilidad de medir un $|1\rangle$. Esto lo hace con el operador $\mathcal{Q} = \mathcal{A}\mathcal{S}_0\mathcal{A}^\dagger\mathcal{S}_{\psi_0}$. Donde $S_0$ y $S_{\psi_0}$ son rotaciones, el algoritmo usa una estimación de fase (Quantum Phase Estimation) para conocer la fase de $\mathcal{Q}$ y la mapea a un estimador para $a$.  
+
+Aunque es posible no usar la estimación de fase sabiendo que
+
+\begin{align*}
+\mathcal{Q}^k\mathcal{A}|0\rangle_n|0\rangle 
+=& \cos\left(\left(2k+1\right)\theta_a\right)|\psi_0\rangle_n|0\rangle \\
++& \sin\left(\left(2k+1\right)\theta_a\right)|\psi_1\rangle_n|1\rangle
+\end{align*}
+
+\subsection{Implementación de la función de \textit{payoff}}
+Pero el valor de la acción sólo nos interesa cuando es mayor que el \textit{strike price}, pues es cuando la función de pago retorna algún beneficio.
+
+Como interesa considerar funciones lineales $f$ para cada qubit. Se usa un operador $\mathcal{A}$ tal que $a = \mathbb{E} [f(X)]$ (E es la esperanza matemática.
+
+Se crea un operador que haga 
+
+$$ |i\rangle_n|0\rangle \mapsto |i\rangle_n \left(\cos\left[f(i)\right]|0\rangle+\sin\left[f(i)\right]|1\rangle\right) $$
+
+implementado mediante rotaciones Y controladas. 
+
+A continuación queremos obtener $\mathbb{E}[f(X)]$, donde $f$ es una función lineal y $X$ es una variable aleatoria discretizada.
+
+\begin{minted}{python}
+precio_vencimiento = 1.896
+
+# set the approximation scaling for the payoff function
+c_approx = 0.25
+
+# setup piecewise linear objective fcuntion
+breakpoints = [bajo, precio_vencimiento]
+slopes = [0, 1]
+offsets = [0, 0]
+f_min = 0
+f_max = alto - precio_vencimiento
+european_call_objective = LinearAmplitudeFunction(
+    qubits,
+    slopes,
+    offsets,
+    domain=(bajo, alto),
+    image=(f_min, f_max),
+    breakpoints=breakpoints,
+    rescaling_factor=c_approx
+)
+
+num_qubits = european_call_objective.num_qubits
+european_call = QuantumCircuit(num_qubits) 
+european_call.append(modelo_incertidumbre, range(qubits))
+european_call.append(european_call_objective, range(num_qubits))
+\end{minted}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=5cm]{figures/notebooks/figura02.png}
+    \caption{Visualización del circuito \texttt{european\_call}}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/notebooks/figura03.png}
+    \caption{Visualización de la función de pago}
+\end{figure}
+
+\subsection{Evaluación del \textit{payoff} esperado}
+Se compara el valor a partir del cual empieza a ser rentable la inversión del modelo con el del circuito que aplica la estimación de amplitud. En primer lugar usando el circuito implementado paso a paso para después compararlo con el circuito de la función del modulo finance de qiskit ``EuropeanCallExpectedValue'' para comprobar la precisión de ambos circuitos.
+
+\begin{minted}{python}
+epsilon = 0.01
+alpha = 0.05
+
+# construct amplitude estimation
+ae = IterativeAmplitudeEstimation(
+  epsilon=epsilon,alpha=alpha,
+  state_preparation=european_call,
+  objective_qubits=[3],
+  post_processing=european_call_objective.post_processing
+)
+
+result = ae.run(quantum_instance=QasmSimulator()))
+
+conf_int = np.array(result['confidence_interval'])
+print('Exact value:        \t%.4f' % exact_value)
+print('Estimated value:    \t%.4f' % (result['estimation']))
+print('Confidence interval:\t[%.4f, %.4f]' % tuple(conf_int))
+\end{minted}
+\begin{resultado}
+\begin{verbatim}
+Exact value:        	0.1623
+Estimated value:    	0.1698
+Confidence interval:	[0.1637, 0.1760]
+\end{verbatim}
+\end{resultado}
+
+\begin{minted}{python}
+from qiskit.finance.applications import EuropeanCallExpectedValue
+
+#Evalúa la opción call según el modelo proporcionado
+european_call_objective = EuropeanCallExpectedValue(qubits,
+    precio_vencimiento,
+    rescaling_factor=c_approx,
+    bounds=(bajo, alto))
+
+european_cal1 = european_call_objective.compose(modelo_incertidumbre, front=True)
+
+epsilon = 0.01
+alpha = 0.05
+
+ae = IterativeAmplitudeEstimation(
+    epsilon=epsilon, alpha=alpha,
+    state_preparation = european_cal1,
+    objective_qubits = [3],
+    post_processing = european_call_objective.post_processing)
+result = ae.run(quantum_instance=QasmSimulator())
+
+conf_int = np.array(result['confidence_interval'])
+print('Exact value:        \t%.4f' % exact_value)
+print('Estimated value:    \t%.4f' % (result['estimation']))
+print('Confidence interval:\t[%.4f, %.4f]' % tuple(conf_int))
+\end{minted}
+
+\begin{resultado}
+\begin{verbatim}
+Exact value:        	0.1623
+Estimated value:    	0.1704
+Confidence interval:	[0.1620, 0.1789]
+\end{verbatim}
+\end{resultado}
+
+Tras varias ejecuciones hemos observado que ambos circuitos parecen funcionar con la misma precisión y nos dan resultados parecidos.
+
+\begin{minted}{python}
+from qiskit.finance.applications import EuropeanCallDelta
+
+european_call_delta = EuropeanCallDelta(qubits, precio_vencimiento, bounds=(bajo, alto))
+state_preparation = QuantumCircuit(european_call_delta.num_qubits)
+state_preparation.append(modelo_incertidumbre, range(modelo_incertidumbre.num_qubits))
+state_preparation.append(european_call_delta, range(european_call_delta.num_qubits))
+\end{minted}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/notebooks/figura04.png}
+    \caption{Visualización del circuito \texttt{european\_call\_delta}}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[height=5cm]{figures/notebooks/figura05.png}
+    \caption{Visualización del circuito \texttt{state\_preparation}}
+    \label{fig:my_label}
+\end{figure}

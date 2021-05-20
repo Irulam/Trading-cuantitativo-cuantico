@@ -1,0 +1,83 @@
+\begin{tikzpicture}[
+        node distance=4mm and 14mm,
+        label distance=-2mm,
+        every node/.style={circle,fill=black,inner sep=0pt,minimum size=5pt},
+        every path/.style={very thick,-stealth}
+    ]
+    \node[label=above:{30.00€}] (r) {};
+    
+    \node[above right=of r,label=above:{\footnotesize 31.50€}] (u) {};
+    \node[below right=of r,label=above:{\footnotesize 28.57€}] (d) {};
+    
+    \path[green] (r) edge (u);
+    \path[red]   (r) edge (d);
+    
+    \node[above right=of u,label=above:{\footnotesize 33.08€}] (uu) {};
+    \node[above right=of d,label=above:{\footnotesize 30.00€}] (du) {};
+    \pgfnodealias{ud}{du}
+    \node[below right=of d,label=above:{\footnotesize 27.21€}] (dd) {};
+
+    \path[green] (u) edge (uu);
+    \path[green] (d) edge (du);
+    \path[red]   (u) edge (ud);
+    \path[red]   (d) edge (dd);
+    
+    \node[above right=of uu,label=above:{\footnotesize 34.73€}] (uuu) {};
+    \node[above right=of du,label=above:{\footnotesize 31.50€}] (duu) {};
+    \node[above right=of dd,label=above:{\footnotesize 28.57€}] (ddu) {};
+    \node[below right=of dd,label=above:{\footnotesize 25.91€}] (ddd) {};
+    \pgfnodealias{udu}{duu}
+    \pgfnodealias{uud}{duu}
+    \pgfnodealias{dud}{ddu}
+    \pgfnodealias{udd}{ddu}
+    
+    \path[green] (uu) edge (uuu);
+    \path[green] (du) edge (duu);
+    % \path[green] (ud) edge (udu);
+    \path[green] (dd) edge (ddu);
+    \path[red]   (uu) edge (uud);
+    \path[red]   (du) edge (dud);
+    % \path[red]   (ud) edge (udd);
+    \path[red]   (dd) edge (ddd);
+\end{tikzpicture}
+
+\begin{tikzpicture}[
+        node distance=4mm and 14mm,
+        label distance=-2mm,
+        every node/.style={circle,fill=black,inner sep=0pt,minimum size=5pt},
+        every path/.style={very thick,stealth-}
+    ]
+    \node[label=above:{0.91€}] (r) {};
+    
+    \node[above left=of r,label=above:{\footnotesize 1.39€}] (u) {};
+    \node[below left=of r,label=above:{\footnotesize 0.18€}] (d) {};
+    
+    \path (r) edge (u);
+    \path (r) edge (d);
+    
+    \node[above left=of u,label=above:{\footnotesize 2.44€}] (uu) {};
+    \node[above left=of d,label=above:{\footnotesize 0.30€}] (du) {};
+    \pgfnodealias{ud}{du}
+    \node[below left=of d,label=above:{\footnotesize 0.00€}] (dd) {};
+
+    \path (u) edge (uu);
+    \path (d) edge (du);
+    \path (u) edge (ud);
+    \path (d) edge (dd);
+    
+    \node[above left=of uu,label=above:{\footnotesize 3.73€}] (uuu) {};
+    \node[above left=of du,label=above:{\footnotesize 0.50€}] (duu) {};
+    \node[above left=of dd,label=above:{\footnotesize 0.00€}] (ddu) {};
+    \node[below left=of dd,label=above:{\footnotesize 0.00€}] (ddd) {};
+    \pgfnodealias{udu}{duu}
+    \pgfnodealias{uud}{duu}
+    \pgfnodealias{dud}{ddu}
+    \pgfnodealias{udd}{ddu}
+    
+    \path (uu) edge (uuu);
+    \path (du) edge (duu);
+    \path (dd) edge (ddu);
+    \path (uu) edge (uud);
+    \path (du) edge (dud);
+    \path (dd) edge (ddd);
+\end{tikzpicture}

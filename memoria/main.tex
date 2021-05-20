@@ -1,0 +1,94 @@
+\documentclass[a4paper,12pt,twocolumn]{extarticle}
+\usepackage[utf8]{inputenc}
+\usepackage[paper=a4paper,left=24mm,right=24mm,top=20mm,bottom=20mm]{geometry}
+\usepackage[svgnames]{xcolor}
+\usepackage[spanish]{babel}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{csquotes}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{titling}
+\usepackage{hyperref}
+\usepackage[sorting=none]{biblatex}
+\usepackage{tgheros} 
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{minted}
+
+\setminted[python]{
+    % fontsize=\footnotesize,
+    fontsize=\scriptsize,
+    breaklines
+}
+
+\hypersetup{
+    colorlinks=true
+}
+
+% enumitem config
+\renewcommand\labelitemi{--}
+\setlist[itemize]{itemsep=0em}
+
+% Redefining titles
+\titleformat{\section}{\mdseries\Large\sffamily}{\thesection. }{0em}{\Large\mdseries\sffamily}
+\titleformat{\subsection}{\large\sffamily}{\thesubsection. }{0em}{\large\sffamily}
+\titleformat{\subsubsection}{\sffamily}{\thesubsubsection. }{0em}{\sffamily}
+
+% New commands 
+\newcommand*{\email}[1]{\normalsize\href{mailto:#1}{#1}}
+\newcommand{\projectloc}{\href{https://github.com/Irulam/Trading-cuantitativo-cuantico}{ GitHub }}
+\makeatletter
+\newcommand{\forceonecolumn}[1]{
+    \if@twocolumn\twocolumn[
+        \begin{@twocolumnfalse}
+        #1
+        \end{@twocolumnfalse}
+    ]
+    \else
+        #1
+    \fi
+}
+\makeatother
+\newtcolorbox{resultado}[1][]{
+    boxrule=0pt, arc=0pt,
+    left=3pt, right=3pt, boxsep=0pt,
+    colframe=black, colback=Gainsboro,
+    fontupper=\scriptsize,
+    #1,
+}
+
+%%%% COSAS DE TIKZ
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+\tikzset{>=stealth}
+\pgfmathdeclarefunction{gauss}{2}{\pgfmathparse{1/(#2*sqrt(2*pi))*exp(-((x-#1)^2)/(2*#2^2))}}
+\pgfmathdeclarefunction{lognormal}{2}{\pgfmathparse{1/(x*#2*sqrt(2*pi))*exp(-((ln(x)-#1)^2)/(2*#2^2))}}
+
+% \title{\sffamily\bfseries Apliaciones Financieras\\ de la Computación Cuántica}
+\title{\sffamily\bfseries Valoración de Instrumentos Financieros Derivados mediante Computación Cuántica}
+\date{\today{}}
+\author{David Davó Laviña\\\email{ddavo@ucm.es}\and Leidy Vanesa Vidales González\\\email{leidyvid@ucm.es}}
+
+\addbibresource{bibliografia.bib}
+
+\begin{document}
+\forceonecolumn{
+    \maketitle
+    \begin{abstract}
+    Un concepto interesante en la computación cuántica es el ``aventajamiento cuántico" \cite{Egger2020}, consistente en buscar aplicaciones en las que la ejecución de algoritmos cuánticos consiga un \textit{speedup} considerable con respecto a su equivalente clásico. En la actualidad, contamos con varias herramientas de programación cuántica, pero usadas principalmente en investigación. Sin embargo, su integración en los flujos de trabajo de las empresas es inminente, hacia principios de 2023 según IBM \cite{wehden_faro_gambetta_2021}.
+    
+    Este aventajamiento puede notarse pronto por ejemplo en la simulación, en la que pasaríamos de hacer simulaciones clásicas de Monte Carlo a usar estimaciones de amplitud, con una mejora cuadrática.
+    \end{abstract}
+}
+
+\input{sections/10introduction}
+\input{sections/20introfinance}
+\input{sections/40qiskit}
+
+\nocite{*}
+\printbibliography
+
+\end{document}

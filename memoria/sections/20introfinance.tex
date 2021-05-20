@@ -1,0 +1,119 @@
+\section{Introducción a las finanzas}
+\label{sec:introfinance}
+
+Esta sección esta basada principalmente en \cite{wilmott_howison_dewynne_1995} y \cite{10.5555/1370958}
+
+Podemos distinguir distintos tipos de mercados financieros:
+\begin{itemize}
+    \item \textbf{Mercado de valores} o \textit{stock market}: Se intercambian acciones o \textit{stocks} de empresas
+    \item \textbf{Bonos}: Se comercia con deuda de gobiernos o empresas
+    \item \textbf{Forex}: Mercados basados en el intercambio de la moneda de distintos países
+    \item \textbf{Comodidades:} Se comercia con activos físicos como el petróleo, el oro o el trigo
+    \item \textbf{Mercado a término:} Se comercia con productos financieros derivados, que se basan en el precio de otro activo como \textbf{futuros} y \textbf{opciones}.
+\end{itemize}
+
+Varios de estos mercados pueden ser accesibles mediante una organización pública o privada llamada Bolsa de Valores que estandariza y facilita el comercio de Instrumentos Financieros entre compradores y vendedores.
+
+A continuación explicaremos con más detalle el mercado de valores y los futuros y opciones, que luego optimizaremos en Qiskit.
+
+\subsection{Mercado de valores}
+Se comercia con uno de los instrumentos financieros más básicos, llamados equidad, \textit{stock}, participación o valor. Un inversor da capital a una compañía, y a cambio pasas a ser propietario de una parte de la compañía. El conjunto de personas que invierten en una compañía se denomina \textit{shareholders} o accionistas, y técnicamente tienen cierto poder de decisión en las operaciones que realice la empresa. Los directores de la compañía deben servir a los intereses de los accionistas. Cada accionista también recibirá \textit{dividendos} en un periodo de tiempo determinado, por ejemplo cada trimestre, cada año, o cada 6 meses. Además, en cualquier momento puedes decidir vender tu acción (ya sea en una bolsa de valores, o de forma externa, conocido como OTC o \textit{Over The Counter}), por lo que puedes ganar dinero si inviertes en una empresa con acciones a un precio bajo, y vendes las acciones cuando su valor sube.
+
+\subsection{Futuros y forwards}
+Los \textbf{futuros} y los \textbf{forwards} son Instrumentos Financieros Derivados, es decir, su valor depende del valor de otro instrumento financiero. En este caso, de una acción. Ambos son contratos en los que una parte promete comprar a un activo a otra parte en un tiempo determinado (fecha de entrega o madurez) a un precio acordado llamado precio de entrega. 
+
+Los contratos \textbf{forward} son acuerdos privados (OTC o \textit{Over The Counter}) en los que
+el precio del activo está determinado en el momento del contrato. Cuando llega la fecha de entrega, debemos comprar la acción al precio de entrega, sea este mayor o menor que el precio actual de mercado de la acción.
+
+Un contrato de \textbf{futuro} es muy similar al contrato forward, pero están regulados por mercados de futuros (es decir, en una bolsa de valores) y además su valor se va ajustando diariamente, por lo que el precio de entrega en la fecha de entrega es igual al precio de mercado.
+
+Tanto futuros como forwards pueden usarse para \textit{especulación}, en la que ``apuestas"  sobre la dirección en la que se moverá el precio de un activo. Puedes \textit{ir largo} y, cuando recibas el activo llegado el tiempo de entrega, puedes venderlo inmediatamente para recibir un beneficio. También tienes la opción de \textit{ir corto} y vender el activo (que aún no posees) mientras que estableces un contrato de futuro.
+Otra posible operación es el \textit{hedging} o cobertura, que consiste en disminuir el riesgo invirtiendo en un activo financiero relacionado con el que ya se ha invertido de tal forma que respalde a una posible pérdida. 
+
+\subsection{Opciones}
+Son derivados financieros. Podemos distinguir dos tipos de opciones, las opciones de venta (\textit{calls}) y las opciones de compra (\textit{puts}). Mientras que el titular de un contrato de futuro está \textbf{obligado} a liquidar el activo subyacente llegada la madurez del contrato (a no ser que se cierre antes de la fecha de entrega), en las opciones obtenemos el \textit{derecho} a comprar/vender a un precio determinado llamado \textit{precio de ejercicio} o \textit{strike} antes de una fecha determinada llamada \textit{fecha de vencimiento}.
+
+Por ejemplo, si compramos una opción con fecha de vencimiento dentro de un año por 100€, y el día de la fecha de vencimiento el precio de mercado del activo subyacente es de 120€, podemos ejecutar la opción, comprar el activo y venderlo inmediatamente, obteniendo un beneficio de 20€.
+
+Siendo $V$ el valor de la acción en la fecha de vencimiento, y sea $E$ el precio de ejercicio, podemos definir nuestro beneficio al vencimiento con la siguiente función, llamada pago (\textit{payoff}):
+\begin{equation}
+    \label{eq:optionput}  
+    \max\left(V-E, 0\right)
+\end{equation}
+
+Es decir, cuando el precio de ejercicio (\textit{spot price}) es mayor que el precio de vencimiento (\textit{strike price}), decidimos no ejecutar la opción, porque no obtendríamos ningún beneficio.
+
+Análogamente en una opción de venta tendríamos la siguiente:
+\begin{equation}
+    \label{eq:optioncall}
+    \max\left(E-V, 0\right)
+\end{equation}
+
+Estas funciones se denominan funciones de recompensa y nos indican el beneficio que podemos obtener con un activo dependiendo de determinados parámetros.
+
+Podemos distinguir dos tipos de opciones:
+\begin{itemize}
+    \item \textbf{Europeas}: El ejercicio sólo se permite en la fecha de vencimiento
+    \item \textbf{Americanas}: El ejercicio se permite en cualquier momento antes de la fecha de vencimiento
+\end{itemize}
+
+Nos vamos a fijar principalmente en las opciones Europeas al ser más sencillas. Nuestro objetivo será valorar el valor de la opción antes de comprarla, y para ello intentaremos predecir dentro de un intervalo de confianza el valor del subyacente en el tiempo de expiración.
+
+\subsubsection{Modelo Binomial}
+Existen muchos métodos para intentar calcular el valor de un activo en un tiempo determinado, siendo el más simple el modelo binomial o BOPM (\textit{Binomial Options Pricing Model}).
+
+En el modelo binomial suponemos que el activo puede subir o bajar de valor en unas cantidades determinadas $u$ y $d$ de un día al siguiente, con una probabilidad $p$. Sin entrar a cómo calcular estos parámetros, generamos un árbol de probabilidades de la misma manera que hacíamos en el instituto, iterativamente, hasta llegar a la fecha de vencimiento. Tendremos por lo tanto un árbol con las distintas trayectorias: ``Todos los días sube'', ``El primer día sube, el siguiente baja, luego sube...'', ``Todos los días baja'', ``Sube dos de cada tres días'', etc. Nuestro árbol tendrá por lo tanto $2^n$ ramas, siendo n el número de días que hayan pasado, o la profundidad del árbol. 
+
+\begin{figure}[h]
+    \centering
+    % \resizebox{\textwidth}{!}{\include{}
+    \include{figures/bopm}
+    \caption{Cálculo del \textit{payoff} esperado mediante un árbol binomial para una opción de 31€ con un subyacente que empieza valiendo 30€ y tiene una probabilidad de 0.6 de subir un $5\%$.}
+\end{figure}
+Si seguimos cada uno de los caminos posibles, al final en la hoja podemos calcular el precio del activo en el día $n$ si multiplicamos $u$ cada vez que subimos o multiplicamos por $d$ cada vez que bajamos. Para cada uno de estos nodos, si usamos las ecuaciones~(\ref{eq:optionput}) y (\ref{eq:optioncall}), tenemos que el valor de la opciones de compra y venta es $\max\left(V_n - E,0\right)$ y $\max\left(E-V_n,0\right)$ respectivamente. 
+
+Pero a nosotros no nos interesa conocer el valor de la opción en la fecha de vencimiento, si no conocer el valor ahora, es decir, en la raíz del árbol. Para ello, vamos calculando el valor esperado de los últimos dos nodos, es decir: $V_i=p\cdot u + (p-1)\cdot d$. Cuando terminamos de procesar el árbol de las hojas a la raíz, tenemos el valor esperado~$V_0$ del precio del activo.
+
+\subsubsection{Método de Montecarlo}
+Podemos simular el valor de una opción si modelamos el precio del subyacente y otras fuentes de incertidumbre como una variable aleatoria $X$.
+
+Mediante un método estocástico tenemos una distribución de probabilidad $\mathbb{P}$, con la que podemos generar aleatoriamente $M$ trayectorias de precio.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=\linewidth,
+        legend pos=north east,
+        every axis plot post/.append style={mark=none,domain=0:4,samples=200,smooth},
+        axis x line*=bottom, % no box around the plot, only x and y axis
+        axis y line*=left, % the * suppresses the arrow tips
+        % enlargelimits=upper % extend the axes a bit to the right and top
+    ] 
+    \addlegendentry{$\sigma=1$}
+    \addplot {lognormal(0,1)};
+    \addlegendentry{$\sigma=0.5$}
+    \addplot {lognormal(0,0.5)};
+    \end{axis}
+    \end{tikzpicture}
+    \caption{Función de distribución de una distribución lognormal con $\mu=0$}
+\end{figure}
+
+Este método estocástico se conoce como ``paseo lognormal'', y nos genera una distribución de números log-normal. Es fácil pensar en por qué el precio de un activo puede modelarse con una distribución log-normal, pues:
+\begin{itemize}
+    \item No puede ser menor que cero
+    \item Puede subir infinitamente, aunque la probabilidad de que suba mucho es más baja
+    \item Tiene una probabilidad relativamente alta de quedarse cerca de donde está
+\end{itemize}
+
+Además, podemos modelar su volatilidad modificando la varianza $\sigma^2$ de la distribución.
+
+Para cada una de las trayectorias, calculamos la función de pago $f(X_i)$, y calculamos el valor esperado de todas estas funciones, usando como estimador la media de todos los caminos generados.
+\begin{equation}
+    \hat{\mathbb{E}}_\mathbb{P}\left[f\left(X\right)\right] = \frac{1}{M}\sum^M_{i=1}f\left(X_i\right)
+\end{equation}
+
+En virtud del teorema central del límite, la estimación $\hat{\mathbb{E}}_\mathbb{P}$ converge a $\mathbb{E}_\mathbb{P}$ en el orden de~$\mathcal{O}\left(\frac{1}{\sqrt{M}}\right)$, es decir, para reducir el error en un factor de 10, necesitamos multiplicar las muestras en un factor de 100.
+
+\subsection{Análisis del riesgo}
+Se hace para calcular qué tan fiable es hacer un préstamo. En el análisis del riesgo se usan datos de las compañías tales como la solvencia, que es la capacidad que tiene una empresa de cumplir con sus obligaciones financieras o la liquidación, que es la posibilidad de de pagar en efectivo. 
